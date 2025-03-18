@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
+  // Get DOM elements
   const servicesContainer = document.getElementById('services-container');
-  const resetButton = document.getElementById('reset-defaults');
+  const resetServicesButton = document.getElementById('reset-services');
   
   // Service URLs for reference (same as in background.js)
   const serviceUrls = {
@@ -31,42 +32,47 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   
   // Load current enabled services
-  chrome.storage.sync.get('enabledServices', function(data) {
-    const enabledServices = data.enabledServices || defaultServices;
-    
-    // Create toggle switches for each service
-    for (const [service, url] of Object.entries(serviceUrls)) {
-      const serviceDiv = document.createElement('div');
-      serviceDiv.className = 'service-toggle';
+  function loadServices() {
+    chrome.storage.sync.get('enabledServices', function(data) {
+      const enabledServices = data.enabledServices || defaultServices;
       
-      const label = document.createElement('label');
-      label.textContent = service;
+      // Clear container
+      servicesContainer.innerHTML = '';
       
-      const switchLabel = document.createElement('label');
-      switchLabel.className = 'switch';
-      
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.checked = enabledServices[service] || false;
-      checkbox.dataset.service = service;
-      
-      const slider = document.createElement('span');
-      slider.className = 'slider';
-      
-      switchLabel.appendChild(checkbox);
-      switchLabel.appendChild(slider);
-      
-      serviceDiv.appendChild(label);
-      serviceDiv.appendChild(switchLabel);
-      
-      servicesContainer.appendChild(serviceDiv);
-      
-      // Add change listener for each checkbox
-      checkbox.addEventListener('change', function() {
-        updateEnabledServices();
-      });
-    }
-  });
+      // Create toggle switches for each service
+      for (const [service, url] of Object.entries(serviceUrls)) {
+        const serviceDiv = document.createElement('div');
+        serviceDiv.className = 'service-toggle';
+        
+        const label = document.createElement('label');
+        label.textContent = service;
+        
+        const switchLabel = document.createElement('label');
+        switchLabel.className = 'switch';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = enabledServices[service] || false;
+        checkbox.dataset.service = service;
+        
+        const slider = document.createElement('span');
+        slider.className = 'slider';
+        
+        switchLabel.appendChild(checkbox);
+        switchLabel.appendChild(slider);
+        
+        serviceDiv.appendChild(label);
+        serviceDiv.appendChild(switchLabel);
+        
+        servicesContainer.appendChild(serviceDiv);
+        
+        // Add change listener for each checkbox
+        checkbox.addEventListener('change', function() {
+          updateEnabledServices();
+        });
+      }
+    });
+  }
   
   // Save changes when checkboxes are toggled
   function updateEnabledServices() {
@@ -80,14 +86,18 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.sync.set({ 'enabledServices': enabledServices });
   }
   
-  // Reset to defaults button
-  resetButton.addEventListener('click', function() {
-    chrome.storage.sync.set({ 'enabledServices': defaultServices });
-    
-    // Update UI to reflect defaults
-    const checkboxes = document.querySelectorAll('input[type="checkbox"][data-service]');
-    checkboxes.forEach(checkbox => {
-      checkbox.checked = defaultServices[checkbox.dataset.service] || false;
+  // Reset services to defaults
+  if (resetServicesButton) {
+    resetServicesButton.addEventListener('click', function() {
+      chrome.storage.sync.set({ 'enabledServices': defaultServices }, function() {
+        loadServices();
+      });
     });
-  });
+  }
+  
+  // Initial load
+  loadServices();
+  
+  // Clean up any old Quick Find targets data (no longer needed)
+  chrome.storage.sync.remove('quickFindTargets');
 });

@@ -3,7 +3,15 @@
   "name": "SOC OSINT Search",
   "version": "1.0",
   "description": "Right-click search for IPs, domains, hashes and other indicators on popular OSINT services",
-  "permissions": ["contextMenus", "storage"],
+  "permissions": [
+    "contextMenus", 
+    "storage", 
+    "tabs", 
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   
   "action": {
     "default_popup": "popup.html",

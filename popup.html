@@ -81,14 +81,29 @@
       color: #666;
       text-align: center;
     }
+    .note {
+      margin-top: 10px;
+      padding: 8px;
+      background-color: #f8f8f8;
+      border-left: 3px solid #2196F3;
+      font-size: 12px;
+      color: #666;
+    }
   </style>
 </head>
 <body>
   <h1>SOC OSINT Search Tools</h1>
+  
   <div id="services-container">
     <!-- Services will be populated here by JavaScript -->
   </div>
-  <button id="reset-defaults">Reset to Defaults</button>
+  
+  <button id="reset-services">Reset to Defaults</button>
+  
+  <div class="note">
+    <strong>Note:</strong> "Microsoft Apps" is available directly in the context menu and searches the Microsoft Apps JSON repository.
+  </div>
+  
   <div class="version-info">SOC OSINT Search v1.0</div>
   
   <script src="popup.js"></script>
