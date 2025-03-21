@@ -46,7 +46,6 @@ A Chrome extension that allows security professionals to quickly search for indi
 - `popup.html` - HTML for the configuration popup
 - `popup.js` - JavaScript for the configuration popup
 - `icon512.png` - Extension icon
-- `browser-polyfill.min.js` - Mozilla's WebExtension polyfill for cross-browser compatibility
 
 ## Permissions
 
