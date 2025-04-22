@@ -8,6 +8,7 @@ This repository contains two browser extensions:
 
 - `/chrome` - Extension for Google Chrome and Chromium-based browsers
 - `/firefox` - Extension for Mozilla Firefox
+             - You can now find in the Firefox Browser Add-ons Store [here](https://addons.mozilla.org/en-GB/firefox/addon/soc-osint-extension/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search)
 
 Each directory contains a standalone version of the extension adapted for that particular browser.
 
