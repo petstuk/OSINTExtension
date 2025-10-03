@@ -242,7 +242,8 @@ function rerunAnalysis(ioc, tool) {
     "ThreatCrowd": "https://threatcrowd.org/ip.php?ip=[QUERY]",
     "IBM X-Force Exchange": "https://exchange.xforce.ibmcloud.com/search/[QUERY]",
     "MalwareBazaar": "https://bazaar.abuse.ch/browse.php?search=[QUERY]",
-    "GreyNoise": "https://viz.greynoise.io/query/?gnql=[QUERY]"
+    "GreyNoise": "https://viz.greynoise.io/query/?gnql=[QUERY]",
+    "Spur": "https://app.spur.us/search?q=[QUERY]"
   };
   
   if (serviceUrls[tool]) {

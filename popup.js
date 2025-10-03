@@ -112,7 +112,8 @@ if (typeof browser === 'undefined') {
       "ThreatCrowd": "https://threatcrowd.org/ip.php?ip=[QUERY]",
       "IBM X-Force Exchange": "https://exchange.xforce.ibmcloud.com/search/[QUERY]",
       "MalwareBazaar": "https://bazaar.abuse.ch/browse.php?search=[QUERY]",
-      "GreyNoise": "https://viz.greynoise.io/query/?gnql=[QUERY]"
+      "GreyNoise": "https://viz.greynoise.io/query/?gnql=[QUERY]",
+      "Spur": "https://app.spur.us/search?q=[QUERY]"
     };
     
     if (serviceUrls[tool]) {
@@ -261,7 +262,8 @@ if (typeof browser === 'undefined') {
       "ThreatCrowd",
       "IBM X-Force Exchange",
       "MalwareBazaar",
-      "GreyNoise"
+      "GreyNoise",
+      "Spur"
     ];
     
     toolsContainer.innerHTML = '';
@@ -354,10 +356,188 @@ if (typeof browser === 'undefined') {
     }
   }
   
+  // Load and display enabled services as badges
+  function loadEnabledServices() {
+    console.log('Popup: Loading enabled services...');
+    
+    // Handle both Chrome (callback) and Firefox (promise) APIs
+    if (browser.storage.sync.get.length > 1) {
+      // Chrome-style callback API
+      browser.storage.sync.get('enabledServices', function(data) {
+        displayEnabledServices(data.enabledServices || {});
+      });
+    } else {
+      // Firefox-style promise API
+      browser.storage.sync.get('enabledServices').then(function(data) {
+        displayEnabledServices(data.enabledServices || {});
+      }).catch(error => {
+        console.error("Error loading enabled services:", error);
+      });
+    }
+  }
+  
+  function displayEnabledServices(enabledServices) {
+    const container = document.getElementById('enabled-services-container');
+    container.innerHTML = '';
+    
+    const enabled = Object.entries(enabledServices).filter(([service, isEnabled]) => isEnabled);
+    
+    if (enabled.length === 0) {
+      container.innerHTML = '<div style="text-align: center; color: #64748b; font-size: 11px; padding: 10px;">No services enabled</div>';
+      return;
+    }
+    
+    enabled.forEach(([service, _]) => {
+      const badge = document.createElement('span');
+      badge.className = 'enabled-service-badge';
+      badge.textContent = service;
+      badge.title = service;
+      container.appendChild(badge);
+    });
+  }
+  
+  function showManageServicesModal() {
+    const modal = document.getElementById('manage-services-modal');
+    const container = document.getElementById('all-services-container');
+    
+    // Load current services
+    if (browser.storage.sync.get.length > 1) {
+      // Chrome-style callback API
+      browser.storage.sync.get('enabledServices', function(data) {
+        populateServicesModal(data.enabledServices || {});
+      });
+    } else {
+      // Firefox-style promise API
+      browser.storage.sync.get('enabledServices').then(function(data) {
+        populateServicesModal(data.enabledServices || {});
+      }).catch(error => {
+        console.error("Error loading services for modal:", error);
+      });
+    }
+    
+    modal.style.display = 'flex';
+  }
+  
+  function populateServicesModal(enabledServices) {
+    const container = document.getElementById('all-services-container');
+    container.innerHTML = '';
+    
+    const allServices = [
+      "VirusTotal",
+      "AbuseIPDB",
+      "URLScan",
+      "Shodan",
+      "Censys",
+      "AlienVault OTX",
+      "ThreatCrowd",
+      "IBM X-Force Exchange",
+      "MalwareBazaar",
+      "GreyNoise",
+      "Spur"
+    ];
+    
+    allServices.forEach(service => {
+      const serviceDiv = document.createElement('div');
+      serviceDiv.className = 'service-toggle';
+      
+      const label = document.createElement('label');
+      label.textContent = service;
+      label.style.cursor = 'pointer';
+      
+      const switchLabel = document.createElement('label');
+      switchLabel.className = 'switch';
+      
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = enabledServices[service] || false;
+      checkbox.dataset.service = service;
+      
+      const slider = document.createElement('span');
+      slider.className = 'slider';
+      
+      switchLabel.appendChild(checkbox);
+      switchLabel.appendChild(slider);
+      
+      serviceDiv.appendChild(label);
+      serviceDiv.appendChild(switchLabel);
+      
+      // Make the whole div clickable (except when clicking directly on switch elements)
+      serviceDiv.addEventListener('click', function(e) {
+        // Don't toggle if clicking on the checkbox or slider directly
+        if (!e.target.closest('.switch')) {
+          checkbox.checked = !checkbox.checked;
+        }
+      });
+      
+      container.appendChild(serviceDiv);
+    });
+  }
+  
+  function hideManageServicesModal() {
+    const modal = document.getElementById('manage-services-modal');
+    modal.style.display = 'none';
+  }
+  
+  function saveServices() {
+    const checkboxes = document.querySelectorAll('#all-services-container input[type="checkbox"]');
+    const enabledServices = {};
+    
+    checkboxes.forEach(checkbox => {
+      enabledServices[checkbox.dataset.service] = checkbox.checked;
+    });
+    
+    // Handle both Chrome (callback) and Firefox (promise) APIs
+    if (browser.storage.sync.set.length > 1) {
+      // Chrome-style callback API
+      browser.storage.sync.set({ 'enabledServices': enabledServices }, function() {
+        loadEnabledServices();
+        hideManageServicesModal();
+      });
+    } else {
+      // Firefox-style promise API
+      browser.storage.sync.set({ 'enabledServices': enabledServices }).then(() => {
+        loadEnabledServices();
+        hideManageServicesModal();
+      }).catch(error => {
+        console.error("Error saving services:", error);
+      });
+    }
+  }
+  
+  function resetServicesToDefaults() {
+    const defaultServices = {
+      "VirusTotal": true,
+      "AbuseIPDB": true,
+      "URLScan": true,
+      "Shodan": true,
+      "Censys": true,
+      "AlienVault OTX": true,
+      "ThreatCrowd": true,
+      "IBM X-Force Exchange": true,
+      "MalwareBazaar": true,
+      "GreyNoise": true,
+      "Spur": true
+    };
+    
+    // Handle both Chrome (callback) and Firefox (promise) APIs
+    if (browser.storage.sync.set.length > 1) {
+      // Chrome-style callback API
+      browser.storage.sync.set({ 'enabledServices': defaultServices }, function() {
+        populateServicesModal(defaultServices);
+        loadEnabledServices();
+      });
+    } else {
+      // Firefox-style promise API
+      browser.storage.sync.set({ 'enabledServices': defaultServices }).then(() => {
+        populateServicesModal(defaultServices);
+        loadEnabledServices();
+      }).catch(error => {
+        console.error("Error resetting services:", error);
+      });
+    }
+  }
+  
   document.addEventListener('DOMContentLoaded', function() {
-    // Get DOM elements
-    const servicesContainer = document.getElementById('services-container');
-    const resetServicesButton = document.getElementById('reset-services');
     
     // Service URLs for reference (same as in background.js)
     const serviceUrls = {
@@ -370,7 +550,8 @@ if (typeof browser === 'undefined') {
       "ThreatCrowd": "https://threatcrowd.org/ip.php?ip=[QUERY]",
       "IBM X-Force Exchange": "https://exchange.xforce.ibmcloud.com/search/[QUERY]",
       "MalwareBazaar": "https://bazaar.abuse.ch/browse.php?search=[QUERY]",
-      "GreyNoise": "https://viz.greynoise.io/query/?gnql=[QUERY]"
+      "GreyNoise": "https://viz.greynoise.io/query/?gnql=[QUERY]",
+      "Spur": "https://app.spur.us/search?q=[QUERY]"
     };
     
     // Default services
@@ -384,83 +565,35 @@ if (typeof browser === 'undefined') {
       "ThreatCrowd": true,
       "IBM X-Force Exchange": true,
       "MalwareBazaar": true,
-      "GreyNoise": true
+      "GreyNoise": true,
+      "Spur": true
     };
     
-    // Load current enabled services
-    function loadServices() {
-      browser.storage.sync.get('enabledServices').then(function(data) {
-        const enabledServices = data.enabledServices || defaultServices;
-        
-        // Clear container
-        servicesContainer.innerHTML = '';
-        
-        // Create toggle switches for each service
-        for (const [service, url] of Object.entries(serviceUrls)) {
-          const serviceDiv = document.createElement('div');
-          serviceDiv.className = 'service-toggle';
-          
-          const label = document.createElement('label');
-          label.textContent = service;
-          
-          const switchLabel = document.createElement('label');
-          switchLabel.className = 'switch';
-          
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.checked = enabledServices[service] || false;
-          checkbox.dataset.service = service;
-          
-          const slider = document.createElement('span');
-          slider.className = 'slider';
-          
-          switchLabel.appendChild(checkbox);
-          switchLabel.appendChild(slider);
-          
-          serviceDiv.appendChild(label);
-          serviceDiv.appendChild(switchLabel);
-          
-          servicesContainer.appendChild(serviceDiv);
-          
-          // Add change listener for each checkbox
-          checkbox.addEventListener('change', function() {
-            updateEnabledServices();
-          });
-        }
-      }).catch(error => {
-        console.error("Error loading services:", error);
-      });
-    }
-    
-    // Save changes when checkboxes are toggled
-    function updateEnabledServices() {
-      const checkboxes = document.querySelectorAll('input[type="checkbox"][data-service]');
-      const enabledServices = {};
-      
-      checkboxes.forEach(checkbox => {
-        enabledServices[checkbox.dataset.service] = checkbox.checked;
-      });
-      
-      browser.storage.sync.set({ 'enabledServices': enabledServices }).catch(error => {
-        console.error("Error saving services:", error);
-      });
-    }
-    
-    // Reset services to defaults
-    if (resetServicesButton) {
-      resetServicesButton.addEventListener('click', function() {
-        browser.storage.sync.set({ 'enabledServices': defaultServices }).then(function() {
-          loadServices();
-        }).catch(error => {
-          console.error("Error resetting services:", error);
-        });
-      });
-    }
-    
     // Initial load
-    loadServices();
+    loadEnabledServices();
     loadHistory();
     loadCombinations();
+    
+    // Manage Services modal buttons
+    const manageServicesBtn = document.getElementById('manage-services-btn');
+    if (manageServicesBtn) {
+      manageServicesBtn.addEventListener('click', showManageServicesModal);
+    }
+    
+    const saveServicesBtn = document.getElementById('save-services');
+    if (saveServicesBtn) {
+      saveServicesBtn.addEventListener('click', saveServices);
+    }
+    
+    const resetServicesBtn = document.getElementById('reset-services');
+    if (resetServicesBtn) {
+      resetServicesBtn.addEventListener('click', resetServicesToDefaults);
+    }
+    
+    const cancelServicesBtn = document.getElementById('cancel-services');
+    if (cancelServicesBtn) {
+      cancelServicesBtn.addEventListener('click', hideManageServicesModal);
+    }
     
     // Combination modal buttons
     const addCombinationBtn = document.getElementById('add-combination-btn');

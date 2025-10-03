@@ -30,8 +30,8 @@
     }
     
     h1 {
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 600;
       background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -42,10 +42,10 @@
       gap: 8px;
     }
     
-    h1::before {
-      content: '◈';
-      color: #60a5fa;
-      font-size: 18px;
+    h1 img {
+      width: 24px;
+      height: 24px;
+      filter: drop-shadow(0 2px 4px rgba(96, 165, 250, 0.3));
     }
     
     h3 {
@@ -157,24 +157,77 @@
       transform: translateY(-1px);
     }
     
-    /* Services Section */
-    #services-container {
+    /* Active Services Section */
+    #enabled-services-section {
       padding: 16px;
       background: rgba(96, 165, 250, 0.05);
       border-radius: 12px;
       border: 1px solid rgba(96, 165, 250, 0.15);
     }
     
+    #enabled-services-container {
+      margin-bottom: 12px;
+    }
+    
+    .enabled-service-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      margin: 4px;
+      background: linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #e4e7eb;
+      transition: all 0.2s ease;
+    }
+    
+    .enabled-service-badge:hover {
+      background: linear-gradient(135deg, rgba(96, 165, 250, 0.3) 0%, rgba(167, 139, 250, 0.3) 100%);
+      border-color: rgba(96, 165, 250, 0.5);
+      transform: translateY(-1px);
+    }
+    
+    #manage-services-btn {
+      width: 100%;
+      padding: 10px 16px;
+      background: rgba(96, 165, 250, 0.1);
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      color: #60a5fa;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    #manage-services-btn:hover {
+      background: rgba(96, 165, 250, 0.2);
+      border-color: rgba(96, 165, 250, 0.5);
+      transform: translateY(-1px);
+    }
+    
+    /* Services Management Modal */
+    #all-services-container {
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 0 20px;
+    }
+    
     .service-toggle {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 1fr auto;
       align-items: center;
-      padding: 10px 12px;
-      margin-bottom: 8px;
+      padding: 10px 16px;
+      margin-bottom: 6px;
       background: rgba(16, 20, 38, 0.6);
       border-radius: 8px;
       border: 1px solid rgba(96, 165, 250, 0.1);
       transition: all 0.2s ease;
+      cursor: pointer;
+      gap: 20px;
     }
     
     .service-toggle:hover {
@@ -187,79 +240,61 @@
       color: #e4e7eb;
       font-weight: 500;
       cursor: pointer;
+      margin: 0;
+      padding: 0;
     }
     
     /* Toggle Switch */
-    .switch {
+    .service-toggle .switch {
       position: relative;
       display: inline-block;
-      width: 42px;
-      height: 24px;
+      width: 34px !important;
+      height: 18px !important;
+      flex-shrink: 0;
     }
     
-    .switch input {
+    .service-toggle .switch input {
       opacity: 0;
       width: 0;
       height: 0;
     }
     
-    .slider {
+    .service-toggle .switch .slider {
       position: absolute;
       cursor: pointer;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
+      width: 34px !important;
+      height: 18px !important;
       background: rgba(71, 85, 105, 0.5);
       transition: .3s;
-      border-radius: 24px;
+      border-radius: 18px;
       border: 1px solid rgba(96, 165, 250, 0.2);
     }
     
-    .slider:before {
+    .service-toggle .switch .slider:before {
       position: absolute;
       content: "";
-      height: 16px;
-      width: 16px;
-      left: 3px;
-      bottom: 3px;
+      height: 14px;
+      width: 14px;
+      left: 2px;
+      top: 50%;
+      transform: translateY(-50%);
       background: #94a3b8;
       transition: .3s;
       border-radius: 50%;
     }
     
-    input:checked + .slider {
+    .service-toggle .switch input:checked + .slider {
       background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
       border-color: transparent;
     }
     
-    input:checked + .slider:before {
-      transform: translateX(18px);
+    .service-toggle .switch input:checked + .slider:before {
+      transform: translateY(-50%) translateX(16px);
       background: white;
     }
     
-    /* Reset Button */
-    #reset-services {
-      width: 100%;
-      margin-top: 16px;
-      padding: 10px 16px;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #f87171;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    #reset-services:hover {
-      background: rgba(239, 68, 68, 0.2);
-      border-color: rgba(239, 68, 68, 0.5);
-      transform: translateY(-1px);
-    }
     
     /* Custom Combinations Section */
     #combinations-section {
@@ -448,64 +483,68 @@
       margin-top: 20px;
     }
     
-    .btn-primary {
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    #reset-services {
       flex: 1;
-      padding: 10px 16px;
-      background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 10px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
     
-    .btn-primary:hover {
+    .btn-primary,
+    #save-services {
+      background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+      color: white;
+      border: none;
+    }
+    
+    .btn-primary:hover,
+    #save-services:hover {
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba(167, 139, 250, 0.4);
     }
     
-    .btn-secondary {
-      flex: 1;
-      padding: 10px 16px;
+    .btn-secondary,
+    #cancel-services {
       background: rgba(71, 85, 105, 0.3);
       color: #94a3b8;
       border: 1px solid rgba(71, 85, 105, 0.5);
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
     
-    .btn-secondary:hover {
+    .btn-secondary:hover,
+    #cancel-services:hover {
       background: rgba(71, 85, 105, 0.5);
       transform: translateY(-1px);
     }
     
     .btn-danger {
-      flex: 1;
-      padding: 10px 16px;
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
     
     .btn-danger:hover {
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+    }
+    
+    #reset-services {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+    
+    #reset-services:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.5);
+      transform: translateY(-1px);
     }
     
     .confirm-modal {
@@ -559,7 +598,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>SOC OSINT Search</h1>
+    <h1>
+      <img src="icon512.png" alt="OSINT">
+      SOC OSINT Search
+    </h1>
     
     <div id="history-section">
       <h3>Recent Analysis</h3>
@@ -569,11 +611,13 @@
       <button id="view-archive">View Full Archive</button>
     </div>
     
-    <div id="services-container">
-      <!-- Services will be populated here by JavaScript -->
+    <div id="enabled-services-section">
+      <h3>Active Tools</h3>
+      <div id="enabled-services-container">
+        <!-- Enabled services will be shown here -->
+      </div>
+      <button id="manage-services-btn">⚙️ Manage Services</button>
     </div>
-    
-    <button id="reset-services">Reset to Defaults</button>
     
     <div id="combinations-section">
       <h3>Custom Combinations</h3>
@@ -610,6 +654,21 @@
         <div class="modal-buttons">
           <button id="confirm-delete" class="btn-danger">Delete</button>
           <button id="cancel-delete" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="manage-services-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h3>Manage OSINT Services</h3>
+        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 16px;">Enable or disable services to customize your workflow</p>
+        <div id="all-services-container">
+          <!-- All services will be populated here -->
+        </div>
+        <div class="modal-buttons">
+          <button id="save-services" class="btn-primary">Save Changes</button>
+          <button id="reset-services" class="btn-secondary">Reset to Defaults</button>
+          <button id="cancel-services" class="btn-secondary">Cancel</button>
         </div>
       </div>
     </div>

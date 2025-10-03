@@ -24,7 +24,8 @@ const defaultServices = {
   "ThreatCrowd": true,
   "IBM X-Force Exchange": true,
   "MalwareBazaar": true,
-  "GreyNoise": true
+  "GreyNoise": true,
+  "Spur": true
 };
 
 // Service URLs for searching
@@ -38,7 +39,8 @@ const serviceUrls = {
   "ThreatCrowd": "https://threatcrowd.org/ip.php?ip=[QUERY]",
   "IBM X-Force Exchange": "https://exchange.xforce.ibmcloud.com/search/[QUERY]",
   "MalwareBazaar": "https://bazaar.abuse.ch/browse.php?search=[QUERY]",
-  "GreyNoise": "https://viz.greynoise.io/query/?gnql=[QUERY]"
+  "GreyNoise": "https://viz.greynoise.io/query/?gnql=[QUERY]",
+  "Spur": "https://app.spur.us/search?q=[QUERY]"
 };
 
 // Initialize the extension
@@ -56,9 +58,12 @@ function initializeExtension() {
           createContextMenus();
         });
       } else {
-        console.log("Using existing enabled services");
-        enabledServices = data.enabledServices;
-        createContextMenus();
+        console.log("Merging existing enabled services with new defaults");
+        // Merge existing settings with new defaults (adds any new services)
+        enabledServices = { ...defaultServices, ...data.enabledServices };
+        browserAPI.storage.sync.set({ 'enabledServices': enabledServices }, () => {
+          createContextMenus();
+        });
       }
     });
   } else {
@@ -71,9 +76,12 @@ function initializeExtension() {
           createContextMenus();
         });
       } else {
-        console.log("Using existing enabled services");
-        enabledServices = data.enabledServices;
-        createContextMenus();
+        console.log("Merging existing enabled services with new defaults");
+        // Merge existing settings with new defaults (adds any new services)
+        enabledServices = { ...defaultServices, ...data.enabledServices };
+        browserAPI.storage.sync.set({ 'enabledServices': enabledServices }).then(() => {
+          createContextMenus();
+        });
       }
     }).catch(error => {
       console.error("Error loading enabled services:", error);
