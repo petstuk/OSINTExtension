@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unified OSINT Extension Test Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-item { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 5px; }
+        .ioc { background: yellow; padding: 2px 5px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Unified OSINT Extension Test</h1>
+    <p>This extension now works for both Chrome and Firefox!</p>
+    
+    <div class="test-item">
+        <h3>Test IoCs - Select and Right-Click:</h3>
+        <p>IP Address: <span class="ioc">8.8.8.8</span></p>
+        <p>Domain: <span class="ioc">google.com</span></p>
+        <p>Hash: <span class="ioc">d41d8cd98f00b204e9800998ecf8427e</span></p>
+        <p>Suspicious IP: <span class="ioc">185.220.101.182</span></p>
+    </div>
+    
+    <div class="test-item">
+        <h3>Available OSINT Tools:</h3>
+        <ul>
+            <li>✅ VirusTotal</li>
+            <li>✅ AbuseIPDB</li>
+            <li>✅ URLScan</li>
+            <li>✅ Shodan</li>
+            <li>✅ Censys</li>
+            <li>✅ AlienVault OTX</li>
+            <li>✅ ThreatCrowd</li>
+            <li>✅ IBM X-Force Exchange</li>
+            <li>✅ MalwareBazaar</li>
+            <li>✅ GreyNoise</li>
+        </ul>
+    </div>
+    
+    <div class="test-item">
+        <h3>How to Test:</h3>
+        <ol>
+            <li>Load this extension in Firefox (about:debugging) or Chrome (chrome://extensions/)</li>
+            <li>Select any IoC above</li>
+            <li>Right-click → "SOC OSINT Search"</li>
+            <li>Choose your desired tool</li>
+            <li>New tab opens with analysis results</li>
+        </ol>
+    </div>
+</body>
+</html>

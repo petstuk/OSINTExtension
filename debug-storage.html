@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Extension Storage</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        #output {
+            background: #252526;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .success { color: #4ec9b0; }
+        .error { color: #f48771; }
+        .info { color: #9cdcfe; }
+    </style>
+</head>
+<body>
+    <h1>Extension Storage Debug Tool</h1>
+    <div>
+        <button id="check-api-btn">Check Browser API</button>
+        <button id="check-storage-btn">Check Storage Content</button>
+        <button id="add-test-btn">Add Test Data</button>
+        <button id="clear-storage-btn">Clear Storage</button>
+    </div>
+    <div id="output">Click a button to start debugging...</div>
+
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : (type === 'success' ? 'success' : 'info');
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+        }
+        
+        // Browser API compatibility
+        const browserAPI = (() => {
+            if (typeof browser !== 'undefined') {
+                return browser;
+            } else if (typeof chrome !== 'undefined') {
+                return chrome;
+            }
+            return null;
+        })();
+
+        function checkAPI() {
+            output.innerHTML = '';
+            log('=== Browser API Check ===');
+            log('typeof browser: ' + typeof browser);
+            log('typeof chrome: ' + typeof chrome);
+            log('browserAPI available: ' + !!browserAPI);
+            
+            if (browserAPI) {
+                log('browserAPI.storage available: ' + !!(browserAPI.storage), 'success');
+                log('browserAPI.storage.sync available: ' + !!(browserAPI.storage && browserAPI.storage.sync), 'success');
+                log('browserAPI.runtime available: ' + !!(browserAPI.runtime), 'success');
+                
+                if (browserAPI.storage && browserAPI.storage.sync) {
+                    log('storage.sync.get method: ' + typeof browserAPI.storage.sync.get);
+                    log('storage.sync.get.length: ' + browserAPI.storage.sync.get.length);
+                    log('API style: ' + (browserAPI.storage.sync.get.length > 1 ? 'Chrome (callback)' : 'Firefox (promise)'), 'info');
+                }
+            } else {
+                log('Browser API not available!', 'error');
+            }
+        }
+
+        function checkStorage() {
+            output.innerHTML = '';
+            log('=== Checking Storage ===');
+            
+            if (!browserAPI || !browserAPI.storage) {
+                log('Browser API not available!', 'error');
+                return;
+            }
+            
+            // Handle both Chrome (callback) and Firefox (promise) APIs
+            if (browserAPI.storage.sync.get.length > 1) {
+                // Chrome-style callback API
+                log('Using Chrome-style callback API...');
+                browserAPI.storage.sync.get('iocHistory', function(data) {
+                    log('Storage data retrieved:', 'success');
+                    log(JSON.stringify(data, null, 2));
+                    
+                    if (data.iocHistory) {
+                        log('\nHistory entries: ' + data.iocHistory.length, 'success');
+                        data.iocHistory.forEach((item, index) => {
+                            log(`  [${index}] ${item.type}: ${item.ioc} (${item.tool})`);
+                        });
+                    } else {
+                        log('No iocHistory found in storage', 'error');
+                    }
+                });
+            } else {
+                // Firefox-style promise API
+                log('Using Firefox-style promise API...');
+                browserAPI.storage.sync.get('iocHistory').then(function(data) {
+                    log('Storage data retrieved:', 'success');
+                    log(JSON.stringify(data, null, 2));
+                    
+                    if (data.iocHistory) {
+                        log('\nHistory entries: ' + data.iocHistory.length, 'success');
+                        data.iocHistory.forEach((item, index) => {
+                            log(`  [${index}] ${item.type}: ${item.ioc} (${item.tool})`);
+                        });
+                    } else {
+                        log('No iocHistory found in storage', 'error');
+                    }
+                }).catch(error => {
+                    log('Error reading storage: ' + error.message, 'error');
+                });
+            }
+        }
+
+        function addTestData() {
+            output.innerHTML = '';
+            log('=== Adding Test Data ===');
+            
+            const testHistory = [
+                {
+                    ioc: "8.8.8.8",
+                    tool: "VirusTotal",
+                    type: "ip",
+                    timestamp: Date.now() - 300000,
+                    date: new Date(Date.now() - 300000).toLocaleString()
+                },
+                {
+                    ioc: "google.com",
+                    tool: "AbuseIPDB",
+                    type: "domain",
+                    timestamp: Date.now() - 600000,
+                    date: new Date(Date.now() - 600000).toLocaleString()
+                },
+                {
+                    ioc: "5d41402abc4b2a76b9719d911017c592",
+                    tool: "URLScan",
+                    type: "hash",
+                    timestamp: Date.now() - 900000,
+                    date: new Date(Date.now() - 900000).toLocaleString()
+                }
+            ];
+
+            if (browserAPI && browserAPI.storage) {
+                if (browserAPI.storage.sync.set.length > 1) {
+                    // Chrome-style callback API
+                    browserAPI.storage.sync.set({ 'iocHistory': testHistory }, function() {
+                        log('Test data saved successfully (Chrome API)', 'success');
+                        log(JSON.stringify(testHistory, null, 2));
+                    });
+                } else {
+                    // Firefox-style promise API
+                    browserAPI.storage.sync.set({ 'iocHistory': testHistory }).then(() => {
+                        log('Test data saved successfully (Firefox API)', 'success');
+                        log(JSON.stringify(testHistory, null, 2));
+                    }).catch(error => {
+                        log('Error saving test data: ' + error.message, 'error');
+                    });
+                }
+            } else {
+                log('Browser API not available', 'error');
+            }
+        }
+
+        function clearStorage() {
+            output.innerHTML = '';
+            log('=== Clearing Storage ===');
+            
+            if (browserAPI && browserAPI.storage) {
+                if (browserAPI.storage.sync.set.length > 1) {
+                    // Chrome-style callback API
+                    browserAPI.storage.sync.set({ 'iocHistory': [] }, function() {
+                        log('Storage cleared successfully (Chrome API)', 'success');
+                    });
+                } else {
+                    // Firefox-style promise API
+                    browserAPI.storage.sync.set({ 'iocHistory': [] }).then(() => {
+                        log('Storage cleared successfully (Firefox API)', 'success');
+                    }).catch(error => {
+                        log('Error clearing storage: ' + error.message, 'error');
+                    });
+                }
+            } else {
+                log('Browser API not available', 'error');
+            }
+        }
+        
+        // Add event listeners when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('check-api-btn').addEventListener('click', checkAPI);
+            document.getElementById('check-storage-btn').addEventListener('click', checkStorage);
+            document.getElementById('add-test-btn').addEventListener('click', addTestData);
+            document.getElementById('clear-storage-btn').addEventListener('click', clearStorage);
+        });
+    </script>
+</body>
+</html>

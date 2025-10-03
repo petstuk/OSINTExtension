@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OSINT Extension History Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+        .test-section { margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 5px; }
+        .ioc { font-family: monospace; background: #e9ecef; padding: 2px 4px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>OSINT Extension History Test Page</h1>
+    
+    <p>This page contains various IoCs for testing the history functionality. Right-click on any of the highlighted items below and use the OSINT extension to analyze them.</p>
+    
+    <div class="test-section">
+        <h3>IP Addresses (IPv4)</h3>
+        <p>Test these IPs: <span class="ioc">8.8.8.8</span>, <span class="ioc">1.1.1.1</span>, <span class="ioc">192.168.1.1</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h3>IP Addresses (IPv6)</h3>
+        <p>Test these IPv6: <span class="ioc">2001:4860:4860::8888</span>, <span class="ioc">2606:4700:4700::1111</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Domains</h3>
+        <p>Test these domains: <span class="ioc">google.com</span>, <span class="ioc">malware-example.com</span>, <span class="ioc">suspicious-domain.net</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Hashes</h3>
+        <p>MD5: <span class="ioc">5d41402abc4b2a76b9719d911017c592</span></p>
+        <p>SHA1: <span class="ioc">aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d</span></p>
+        <p>SHA256: <span class="ioc">2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h3>URLs</h3>
+        <p>Test these URLs: <span class="ioc">https://example.com/malicious</span>, <span class="ioc">http://suspicious-site.org/payload</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h3>Testing Instructions</h3>
+        <ol>
+            <li>Right-click on any IoC above</li>
+            <li>Select "SOC OSINT Search" from the context menu</li>
+            <li>Choose different OSINT tools to test with</li>
+            <li>Open the extension popup to see recent history</li>
+            <li>Click "View Archive" to see the full history page</li>
+            <li>Test the filtering by IoC type</li>
+        </ol>
+    </div>
+</body>
+</html>

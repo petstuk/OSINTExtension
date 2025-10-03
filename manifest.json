@@ -1,0 +1,47 @@
+{
+  "manifest_version": 2,
+  "name": "SOC OSINT Search",
+  "version": "1.0.0",
+  "description": "Right-click search for IPs, domains, hashes and other indicators on popular OSINT services",
+  
+  "permissions": [
+    "contextMenus", 
+    "storage", 
+    "tabs", 
+    "activeTab",
+    "<all_urls>"
+  ],
+  
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon512.png",
+      "32": "icon512.png", 
+      "48": "icon512.png",
+      "128": "icon512.png"
+    }
+  },
+  
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  
+  "icons": {
+    "16": "icon512.png",
+    "32": "icon512.png",
+    "48": "icon512.png",
+    "128": "icon512.png"
+  },
+  
+  "applications": {
+    "gecko": {
+      "id": "soc-osint-search@unified.com"
+    }
+  },
+  
+  "web_accessible_resources": [
+    "archive.html",
+    "debug-storage.html"
+  ]
+}

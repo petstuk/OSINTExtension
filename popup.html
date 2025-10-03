@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SOC OSINT Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      width: 380px;
+      max-height: 600px;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+      color: #e4e7eb;
+      padding: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      padding: 20px;
+      min-height: 100%;
+    }
+    
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    h1::before {
+      content: '◈';
+      color: #60a5fa;
+      font-size: 18px;
+    }
+    
+    h3 {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+    
+    /* History Section */
+    #history-section {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: rgba(96, 165, 250, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(96, 165, 250, 0.15);
+    }
+    
+    #history-container {
+      max-height: 180px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      background: rgba(16, 20, 38, 0.6);
+      border-radius: 8px;
+      border: 1px solid rgba(96, 165, 250, 0.1);
+      transition: all 0.2s ease;
+    }
+    
+    .history-item:hover {
+      background: rgba(96, 165, 250, 0.1);
+      border-color: rgba(96, 165, 250, 0.3);
+      transform: translateX(2px);
+    }
+    
+    .history-ioc {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: #60a5fa;
+      font-size: 12px;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .history-meta {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+    
+    .history-type {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 9px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    
+    .history-rerun {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    .history-rerun:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    #view-archive {
+      width: 100%;
+      margin-top: 12px;
+      padding: 8px 16px;
+      background: rgba(96, 165, 250, 0.1);
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      color: #60a5fa;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    #view-archive:hover {
+      background: rgba(96, 165, 250, 0.2);
+      border-color: rgba(96, 165, 250, 0.5);
+      transform: translateY(-1px);
+    }
+    
+    /* Services Section */
+    #services-container {
+      padding: 16px;
+      background: rgba(96, 165, 250, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(96, 165, 250, 0.15);
+    }
+    
+    .service-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      background: rgba(16, 20, 38, 0.6);
+      border-radius: 8px;
+      border: 1px solid rgba(96, 165, 250, 0.1);
+      transition: all 0.2s ease;
+    }
+    
+    .service-toggle:hover {
+      background: rgba(96, 165, 250, 0.08);
+      border-color: rgba(96, 165, 250, 0.2);
+    }
+    
+    .service-toggle label {
+      font-size: 13px;
+      color: #e4e7eb;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    /* Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 42px;
+      height: 24px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(71, 85, 105, 0.5);
+      transition: .3s;
+      border-radius: 24px;
+      border: 1px solid rgba(96, 165, 250, 0.2);
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background: #94a3b8;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      border-color: transparent;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(18px);
+      background: white;
+    }
+    
+    /* Reset Button */
+    #reset-services {
+      width: 100%;
+      margin-top: 16px;
+      padding: 10px 16px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    #reset-services:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.5);
+      transform: translateY(-1px);
+    }
+    
+    /* Custom Combinations Section */
+    #combinations-section {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(167, 139, 250, 0.08);
+      border-radius: 12px;
+      border: 1px solid rgba(167, 139, 250, 0.2);
+    }
+    
+    #combinations-list {
+      margin-bottom: 12px;
+    }
+    
+    .combination-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      background: rgba(16, 20, 38, 0.6);
+      border-radius: 8px;
+      border: 1px solid rgba(167, 139, 250, 0.2);
+    }
+    
+    .combination-item:hover {
+      background: rgba(167, 139, 250, 0.1);
+      border-color: rgba(167, 139, 250, 0.3);
+    }
+    
+    .combination-name {
+      font-size: 13px;
+      color: #e4e7eb;
+      font-weight: 600;
+    }
+    
+    .combination-tools {
+      font-size: 10px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    
+    .combination-delete {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .combination-delete:hover {
+      background: rgba(239, 68, 68, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    #add-combination-btn {
+      width: 100%;
+      padding: 10px 16px;
+      background: rgba(167, 139, 250, 0.15);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      color: #c4b5fd;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    #add-combination-btn:hover {
+      background: rgba(167, 139, 250, 0.25);
+      border-color: rgba(167, 139, 250, 0.5);
+      transform: translateY(-1px);
+    }
+    
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      background: linear-gradient(135deg, #1a1f3a 0%, #0a0e27 100%);
+      padding: 24px;
+      border-radius: 12px;
+      width: 340px;
+      max-height: 500px;
+      overflow-y: auto;
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      background: rgba(16, 20, 38, 0.8);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      border-radius: 8px;
+      color: #e4e7eb;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s ease;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: rgba(167, 139, 250, 0.6);
+      box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+    }
+    
+    #combo-tools-container {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .combo-tool-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      margin-bottom: 4px;
+      background: rgba(16, 20, 38, 0.6);
+      border-radius: 6px;
+      border: 1px solid rgba(167, 139, 250, 0.15);
+      transition: all 0.2s ease;
+    }
+    
+    .combo-tool-item:hover {
+      background: rgba(167, 139, 250, 0.08);
+      border-color: rgba(167, 139, 250, 0.3);
+    }
+    
+    .combo-tool-item input[type="checkbox"] {
+      margin-right: 10px;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #a78bfa;
+    }
+    
+    .combo-tool-item label {
+      font-size: 12px;
+      color: #e4e7eb;
+      cursor: pointer;
+      margin: 0;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    
+    .btn-primary {
+      flex: 1;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(167, 139, 250, 0.4);
+    }
+    
+    .btn-secondary {
+      flex: 1;
+      padding: 10px 16px;
+      background: rgba(71, 85, 105, 0.3);
+      color: #94a3b8;
+      border: 1px solid rgba(71, 85, 105, 0.5);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(71, 85, 105, 0.5);
+      transform: translateY(-1px);
+    }
+    
+    .btn-danger {
+      flex: 1;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .btn-danger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+    }
+    
+    .confirm-modal {
+      width: 300px;
+      text-align: center;
+    }
+    
+    .confirm-modal h3 {
+      font-size: 16px;
+      color: #e4e7eb;
+      margin-bottom: 8px;
+    }
+    
+    /* Note Section */
+    .note {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(167, 139, 250, 0.08);
+      border-left: 3px solid #a78bfa;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    
+    .note strong {
+      color: #e4e7eb;
+      display: block;
+      margin-bottom: 4px;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(16, 20, 38, 0.4);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(96, 165, 250, 0.3);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(96, 165, 250, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SOC OSINT Search</h1>
+    
+    <div id="history-section">
+      <h3>Recent Analysis</h3>
+      <div id="history-container">
+        <!-- Recent history will be populated here -->
+      </div>
+      <button id="view-archive">View Full Archive</button>
+    </div>
+    
+    <div id="services-container">
+      <!-- Services will be populated here by JavaScript -->
+    </div>
+    
+    <button id="reset-services">Reset to Defaults</button>
+    
+    <div id="combinations-section">
+      <h3>Custom Combinations</h3>
+      <div id="combinations-list">
+        <!-- Custom combinations will be populated here -->
+      </div>
+      <button id="add-combination-btn">+ New Combination</button>
+    </div>
+    
+    <div id="combination-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h3>Create Custom Combination</h3>
+        <div class="form-group">
+          <label>Combination Name</label>
+          <input type="text" id="combo-name" placeholder="e.g., IP Investigator">
+        </div>
+        <div class="form-group">
+          <label>Select Tools (check at least 2)</label>
+          <div id="combo-tools-container">
+            <!-- Tool checkboxes will be populated here -->
+          </div>
+        </div>
+        <div class="modal-buttons">
+          <button id="save-combination" class="btn-primary">Save</button>
+          <button id="cancel-combination" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="confirm-modal" class="modal" style="display: none;">
+      <div class="modal-content confirm-modal">
+        <h3>Delete this combination?</h3>
+        <p style="color: #94a3b8; font-size: 13px; margin: 12px 0 20px 0;">This action cannot be undone.</p>
+        <div class="modal-buttons">
+          <button id="confirm-delete" class="btn-danger">Delete</button>
+          <button id="cancel-delete" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="note">
+      <strong>Usage:</strong> Select text on any webpage, right-click, and choose "SOC OSINT Search" to analyze with your enabled tools.
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

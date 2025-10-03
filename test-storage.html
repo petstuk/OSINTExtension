@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Storage</title>
+</head>
+<body>
+    <h1>Test Extension Storage</h1>
+    <button onclick="addTestData()">Add Test History Data</button>
+    <button onclick="checkStorage()">Check Storage</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+    <div id="output"></div>
+
+    <script>
+        // Browser API compatibility
+        const browserAPI = (() => {
+            if (typeof browser !== 'undefined') {
+                return browser;
+            } else if (typeof chrome !== 'undefined') {
+                return chrome;
+            }
+            return null;
+        })();
+
+        function addTestData() {
+            const testHistory = [
+                {
+                    ioc: "8.8.8.8",
+                    tool: "VirusTotal",
+                    type: "ip",
+                    timestamp: Date.now() - 300000, // 5 minutes ago
+                    date: new Date(Date.now() - 300000).toLocaleString()
+                },
+                {
+                    ioc: "google.com",
+                    tool: "AbuseIPDB",
+                    type: "domain",
+                    timestamp: Date.now() - 600000, // 10 minutes ago
+                    date: new Date(Date.now() - 600000).toLocaleString()
+                },
+                {
+                    ioc: "5d41402abc4b2a76b9719d911017c592",
+                    tool: "URLScan",
+                    type: "hash",
+                    timestamp: Date.now() - 900000, // 15 minutes ago
+                    date: new Date(Date.now() - 900000).toLocaleString()
+                }
+            ];
+
+            if (browserAPI && browserAPI.storage) {
+                // Handle both Chrome (callback) and Firefox (promise) APIs
+                if (browserAPI.storage.sync.set.length > 1) {
+                    // Chrome-style callback API
+                    browserAPI.storage.sync.set({ 'iocHistory': testHistory }, function() {
+                        document.getElementById('output').innerHTML = '<p>Test data added (Chrome API)</p>';
+                    });
+                } else {
+                    // Firefox-style promise API
+                    browserAPI.storage.sync.set({ 'iocHistory': testHistory }).then(() => {
+                        document.getElementById('output').innerHTML = '<p>Test data added (Firefox API)</p>';
+                    });
+                }
+            } else {
+                document.getElementById('output').innerHTML = '<p>Browser API not available</p>';
+            }
+        }
+
+        function checkStorage() {
+            if (browserAPI && browserAPI.storage) {
+                // Handle both Chrome (callback) and Firefox (promise) APIs
+                if (browserAPI.storage.sync.get.length > 1) {
+                    // Chrome-style callback API
+                    browserAPI.storage.sync.get('iocHistory', function(data) {
+                        document.getElementById('output').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    });
+                } else {
+                    // Firefox-style promise API
+                    browserAPI.storage.sync.get('iocHistory').then(function(data) {
+                        document.getElementById('output').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    });
+                }
+            } else {
+                document.getElementById('output').innerHTML = '<p>Browser API not available</p>';
+            }
+        }
+
+        function clearStorage() {
+            if (browserAPI && browserAPI.storage) {
+                // Handle both Chrome (callback) and Firefox (promise) APIs
+                if (browserAPI.storage.sync.set.length > 1) {
+                    // Chrome-style callback API
+                    browserAPI.storage.sync.set({ 'iocHistory': [] }, function() {
+                        document.getElementById('output').innerHTML = '<p>Storage cleared (Chrome API)</p>';
+                    });
+                } else {
+                    // Firefox-style promise API
+                    browserAPI.storage.sync.set({ 'iocHistory': [] }).then(() => {
+                        document.getElementById('output').innerHTML = '<p>Storage cleared (Firefox API)</p>';
+                    });
+                }
+            } else {
+                document.getElementById('output').innerHTML = '<p>Browser API not available</p>';
+            }
+        }
+    </script>
+</body>
+</html>
