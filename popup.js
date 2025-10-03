@@ -116,6 +116,7 @@ if (typeof browser === 'undefined') {
       "Spur": "https://app.spur.us/search?q=[QUERY]"
     };
     
+    // Check if it's a regular service
     if (serviceUrls[tool]) {
       const url = serviceUrls[tool].replace("[QUERY]", encodeURIComponent(ioc));
       console.log('Popup: Opening URL:', url);
@@ -137,7 +138,52 @@ if (typeof browser === 'undefined') {
         });
       }
     } else {
-      console.error('Popup: Unknown tool:', tool);
+      // It might be a custom combination - load and check
+      console.log('Popup: Not a standard service, checking if it\'s a custom combination');
+      
+      if (browser.storage.sync.get.length > 1) {
+        // Chrome-style callback API
+        browser.storage.sync.get('customCombinations', function(data) {
+          const combinations = data.customCombinations || [];
+          const combo = combinations.find(c => c.name === tool);
+          
+          if (combo && combo.tools) {
+            console.log('Popup: Found custom combination:', combo);
+            // Open all tools in the combination
+            combo.tools.forEach(serviceName => {
+              if (serviceUrls[serviceName]) {
+                const url = serviceUrls[serviceName].replace("[QUERY]", encodeURIComponent(ioc));
+                browser.tabs.create({ url: url });
+              }
+            });
+            window.close();
+          } else {
+            console.error('Popup: Unknown tool or combination:', tool);
+          }
+        });
+      } else {
+        // Firefox-style promise API
+        browser.storage.sync.get('customCombinations').then(function(data) {
+          const combinations = data.customCombinations || [];
+          const combo = combinations.find(c => c.name === tool);
+          
+          if (combo && combo.tools) {
+            console.log('Popup: Found custom combination:', combo);
+            // Open all tools in the combination
+            combo.tools.forEach(serviceName => {
+              if (serviceUrls[serviceName]) {
+                const url = serviceUrls[serviceName].replace("[QUERY]", encodeURIComponent(ioc));
+                browser.tabs.create({ url: url });
+              }
+            });
+            window.close();
+          } else {
+            console.error('Popup: Unknown tool or combination:', tool);
+          }
+        }).catch(error => {
+          console.error('Popup: Error loading combinations:', error);
+        });
+      }
     }
   }
   

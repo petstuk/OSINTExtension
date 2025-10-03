@@ -246,6 +246,7 @@ function rerunAnalysis(ioc, tool) {
     "Spur": "https://app.spur.us/search?q=[QUERY]"
   };
   
+  // Check if it's a regular service
   if (serviceUrls[tool]) {
     const url = serviceUrls[tool].replace("[QUERY]", encodeURIComponent(ioc));
     console.log('Opening URL:', url);
@@ -265,7 +266,50 @@ function rerunAnalysis(ioc, tool) {
       });
     }
   } else {
-    console.error('Unknown tool:', tool);
+    // It might be a custom combination - load and check
+    console.log('Not a standard service, checking if it\'s a custom combination');
+    
+    if (browserAPI.storage.sync.get.length > 1) {
+      // Chrome-style callback API
+      browserAPI.storage.sync.get('customCombinations', function(data) {
+        const combinations = data.customCombinations || [];
+        const combo = combinations.find(c => c.name === tool);
+        
+        if (combo && combo.tools) {
+          console.log('Found custom combination:', combo);
+          // Open all tools in the combination
+          combo.tools.forEach(serviceName => {
+            if (serviceUrls[serviceName]) {
+              const url = serviceUrls[serviceName].replace("[QUERY]", encodeURIComponent(ioc));
+              browserAPI.tabs.create({ url: url });
+            }
+          });
+        } else {
+          console.error('Unknown tool or combination:', tool);
+        }
+      });
+    } else {
+      // Firefox-style promise API
+      browserAPI.storage.sync.get('customCombinations').then(function(data) {
+        const combinations = data.customCombinations || [];
+        const combo = combinations.find(c => c.name === tool);
+        
+        if (combo && combo.tools) {
+          console.log('Found custom combination:', combo);
+          // Open all tools in the combination
+          combo.tools.forEach(serviceName => {
+            if (serviceUrls[serviceName]) {
+              const url = serviceUrls[serviceName].replace("[QUERY]", encodeURIComponent(ioc));
+              browserAPI.tabs.create({ url: url });
+            }
+          });
+        } else {
+          console.error('Unknown tool or combination:', tool);
+        }
+      }).catch(error => {
+        console.error('Error loading combinations:', error);
+      });
+    }
   }
 }
 
